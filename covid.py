@@ -50,8 +50,6 @@ class Covid:
             return covid_list
         elif self.covid_type == "country":
             df = pd.read_html(html_content)[0][["Country,Other", "TotalCases", "TotalDeaths", "TotalRecovered"]]
-            print(df)
-            print(self.decodeHelper())
             return df.loc[df["Country,Other"] == self.decodeHelper()]
 
     def grabCountryInfectionCount(self):

@@ -65,7 +65,9 @@ async def on_message(message):
         print(user_response)
         country_information = covid_country.grabCountryInfectionCount()
         print(country_information)
-        output = f"""{user_response} has {'{:,d}'.format(country_information['TotalCases'][user_response])} total cases
+        output = f"""{user_response} has {'{:,d}'.format(country_information['TotalCases'][user_response])} total cases,
+        {'{:,d}'.format(int(country_information['TotalDeaths'][user_response]))} dead, and 
+        {'{:,d}'.format(int(country_information['TotalRecovered'][user_response]))} recovered.
         """
         await message.channel.send(output)
 
