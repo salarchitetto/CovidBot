@@ -13,9 +13,14 @@ class Covid:
         self.user_response = user_response
 
     @staticmethod
-    def getNumbers(str):
-        array = re.findall(r'[0-9]+', str)
-        return array
+    def getNumbers(to_transform, type=None):
+        if type == "recovered":
+            span_find = re.search("<span>(.*)</span>", to_transform)
+            recoveredArray = re.findall(r"[0-9]+", span_find[0])
+            return recoveredArray
+        else:
+            array = re.findall(r"[0-9]+", to_transform)
+            return array
 
     @staticmethod
     def concatonator(a_list):
@@ -24,17 +29,6 @@ class Covid:
             result += str(x)
 
         return "{:,d}".format(int(result))
-
-    def decodeHelper(self):
-        if self.user_response == "" or None:
-            return "Please enter an appropriate response."
-        else:
-            proc = subprocess.Popen(self.user_response.content, shell=True, stdout=subprocess.PIPE,
-                                    stderr=subprocess.PIPE,
-                                    stdin=subprocess.PIPE)
-            stdout_value = (proc.stdout.read() + proc.stderr.read()).decode("utf-8")
-
-            return stdout_value.split(" ")[2].replace(":", "")
 
     def grabCovidHtml(self):
         covid_list = []
@@ -50,7 +44,7 @@ class Covid:
             return covid_list
         elif self.covid_type == "country":
             df = pd.read_html(html_content)[0][["Country,Other", "TotalCases", "TotalDeaths", "TotalRecovered"]]
-            return df.loc[df["Country,Other"] == self.decodeHelper()]
+            return df.loc[df["Country,Other"] == self.user_response]
 
     def grabCountryInfectionCount(self):
 
@@ -62,15 +56,12 @@ class Covid:
 
     def grabTotalConfirmed(self):
         covid_list = self.grabCovidHtml()
-
         return Covid.concatonator(Covid.getNumbers(covid_list[0]))
 
     def grabTotalDead(self):
         covid_list = self.grabCovidHtml()
-
         return Covid.concatonator(Covid.getNumbers(covid_list[1]))
 
     def grabTotalRecovered(self):
         covid_list = self.grabCovidHtml()
-
-        return Covid.concatonator(Covid.getNumbers(covid_list[2]))
+        return Covid.concatonator(Covid.getNumbers(covid_list[2], "recovered"))

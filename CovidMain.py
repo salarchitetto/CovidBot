@@ -1,5 +1,3 @@
-import subprocess
-
 import discord
 from discord.ext import commands
 from covid import *
@@ -59,16 +57,19 @@ async def on_message(message):
         await message.channel.send("Please enter a country: I.E (USA, Spain, Italy)")
 
         msg = await client.wait_for("message")
+        if msg.content == "South Korea":
+            msg.content = "S. Korea"
 
-        covid_country = Covid(Configs.COVID_COUNTRY, msg)
-        user_response = covid_country.decodeHelper()
-        print(user_response)
+        covid_country = Covid(Configs.COVID_COUNTRY, msg.content)
+
         country_information = covid_country.grabCountryInfectionCount()
         print(country_information)
-        output = f"""{user_response} has {'{:,d}'.format(country_information['TotalCases'][user_response])} total cases,
-        {'{:,d}'.format(int(country_information['TotalDeaths'][user_response]))} dead, and 
-        {'{:,d}'.format(int(country_information['TotalRecovered'][user_response]))} recovered.
-        """
+
+        output = f"{msg.content} has {'{:,d}'.format(country_information['TotalCases'][msg.content])} total cases," + \
+                 f" {'{:,d}'.format(int(country_information['TotalDeaths'][msg.content]))} dead," + \
+                 f" and {'{:,d}'.format(int(country_information['TotalRecovered'][msg.content]))} recovered."
+
         await message.channel.send(output)
+
 
 client.run(Configs.DISCORD_BOT_ID)
