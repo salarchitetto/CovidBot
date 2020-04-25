@@ -26,17 +26,18 @@ async def on_message(message):
     if message.author == client.user:
         return
 
-    if message.content == '-covid help':
-        coms = {'-infections': 'Show the global number of Covid-19 Infections',
-                '-deaths': "Show the global number of Covid-19 Deaths",
-                '-recovered': "Show the global number of Covid-19 Recoveries"}
+    if message.content == "-covid help":
+        coms = {"-infections": "Show the global number of Covid-19 Infections",
+                "-deaths": "Show the global number of Covid-19 Deaths",
+                "-recovered": "Show the global number of Covid-19 Recoveries",
+                "-country infections": "Search for a specific countries Covid-19 metrics"}
 
-        msg = discord.Embed(title='CovidBot',
+        msg = discord.Embed(title="CovidBot",
                             description="Covid-19 Statistics",
                             color=0x0000ff)
         for command, description in coms.items():
             msg.add_field(name=command, value=description, inline=False)
-        msg.add_field(name='Covid-Bot', value='Welcome', inline=False)
+        msg.add_field(name="Covid-Bot", value="Welcome", inline=False)
         await message.channel.send(message.channel, embed=msg)
 
     covidMain = Covid(Configs.COVID_MAIN)
@@ -65,9 +66,19 @@ async def on_message(message):
         country_information = covid_country.grabCountryInfectionCount()
         print(country_information)
 
-        output = f"{msg.content} has {'{:,d}'.format(country_information['TotalCases'][msg.content])} total cases," + \
-                 f" {'{:,d}'.format(int(country_information['TotalDeaths'][msg.content]))} dead," + \
-                 f" and {'{:,d}'.format(int(country_information['TotalRecovered'][msg.content]))} recovered."
+        def nanChecker(a_dict, lookup, content):
+            if str(a_dict[lookup][content]) == "nan":
+                return str(a_dict[lookup][content]).replace("nan", "0")
+            else:
+                return '{:,d}'.format(int(a_dict[lookup][content]))
+
+        cases = nanChecker(country_information, "TotalCases", msg.content)
+        deaths = nanChecker(country_information, "TotalDeaths", msg.content)
+        recovered = nanChecker(country_information, "TotalRecovered", msg.content)
+
+        output = f"{msg.content} has {cases} total cases," + \
+                 f"{deaths} dead," + \
+                 f" and {recovered} recovered."
 
         await message.channel.send(output)
 
